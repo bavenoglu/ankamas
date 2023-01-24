@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://www.drools.org/xsd/kmodule">
+    <kbase name="KBaseA1">
+        <ksession name="KSessionA1" type="stateful"/>
+    </kbase>
+    <kbase name="KBaseA2">
+        <ksession name="KSessionA2" type="stateful"/>
+    </kbase>
+</kmodule>

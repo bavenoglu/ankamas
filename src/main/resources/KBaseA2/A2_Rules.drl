@@ -1,0 +1,15 @@
+package massim.ankamas;
+import eis.iilang.Percept;
+import eis.iilang.Action;
+import eis.iilang.Identifier
+import java.util.List;
+
+global massim.eismassim.EnvironmentInterface eis;
+
+rule "If there is an obstacle in front of the agentA2"
+when
+    $par : Percept(getName().equals("lastActionResult"), getParameters().toString().equals("[failed_path]"));
+then
+    //eis.performAction($par.getName(), new Action("clear", $par.
+    eis.performAction("A2", new Action("move", new Identifier("e")));
+end

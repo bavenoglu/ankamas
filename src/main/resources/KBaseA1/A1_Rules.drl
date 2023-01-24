@@ -1,0 +1,86 @@
+package massim.ankamas;
+import eis.iilang.Percept;
+import eis.iilang.Action;
+import eis.iilang.Identifier;
+import java.util.List;
+import eis.exceptions.ActException;
+import org.apache.logging.log4j.Logger;
+import massim.ankamas.TPercept;
+import massim.ankamas.agents.BasicAgent
+import eis.iilang.Numeral;
+
+global Logger logger;
+global massim.eismassim.EnvironmentInterface eis;
+global BasicAgent agent;
+
+rule "If simulation starts for the first time"
+when
+    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[]"))
+then
+    String direction = agent.generateRandomDirection();
+    eis.performAction("A1", new Action("move", new Identifier(direction)));
+    logger.info("$$$$$ RULE EXECUTION : " + "If simulation starts for the first time : move randomly : " + direction);
+end
+
+rule "When previous move is successful"
+when
+    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[move]"))
+    $lstactnrslt : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionResult"), prcpt.getParameters().toString().equals("[success]"))
+    $lstactnprms : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionParams"), $direction : prcpt.getParameters().toString())
+then
+    eis.performAction("A1", new Action("move", new Identifier($direction.substring(2,3))));
+    logger.info("$$$$$ RULE EXECUTION : " + "When previous move is successful : move randomly : " + $direction.substring(2,3));
+end
+
+rule "If there is an obstacle in front of the agentA1 after a move"
+when
+    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[move]"))
+    $lstactnrslt : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionResult"), prcpt.getParameters().toString().equals("[failed_path]"))
+    $lstactnprms : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionParams"), $direction : prcpt.getParameters().toString())
+then
+    if($direction.equals("[[n]]"))
+        eis.performAction("A1", new Action("clear",new Numeral(0), new Numeral(-1) ));
+    else if ($direction.equals("[[s]]"))
+        eis.performAction("A1", new Action("clear",new Numeral(0), new Numeral(1) ));
+    else if ($direction.equals("[[e]]"))
+        eis.performAction("A1", new Action("clear",new Numeral(1), new Numeral(0) ));
+     else
+        eis.performAction("A1", new Action("clear",new Numeral(-1), new Numeral(0) ));
+    logger.info("$$$$$ RULE EXECUTION : " + "If there is an obstacle in front of the agent : clear " + $direction);
+end
+
+rule "If the obstacle in front of the agentA1 is successfully cleared"
+when
+    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[clear]"))
+    $lstactnrslt : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionResult"), prcpt.getParameters().toString().equals("[success]"))
+    $lstactnprms : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionParams"), $direction : prcpt.getParameters().toString())
+then
+    if($direction.equals("[[0,-1]]"))
+        eis.performAction("A1", new Action("move", new Identifier("n")));
+    else if ($direction.equals("[[0,1]]"))
+        eis.performAction("A1", new Action("move", new Identifier("s")));
+    else if ($direction.equals("[[1,0]]"))
+        eis.performAction("A1", new Action("move", new Identifier("e")));
+     else
+        eis.performAction("A1", new Action("move", new Identifier("w")));
+    logger.info("$$$$$ RULE EXECUTION : " + "If there is an obstacle in front of the agent : clear " + $direction);
+end
+
+rule "If massim produces failed_random randomly"
+when
+    $lstactnrslt : TPercept(prcpt.getName().equals("lastActionResult"), prcpt.getParameters().toString().equals("[failed_random]"))
+then
+    String direction = agent.generateRandomDirection();
+    eis.performAction("A1", new Action("move", new Identifier(direction)));
+    logger.info("$$$$$ RULE EXECUTION : " + "If massim produces failed_random randomly : move randomly : " + direction);
+end
+
+rule "If massim produces failed_status after a move"
+when
+    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[move]"))
+    $lstactnrslt : TPercept(prcptid == $tprcpt.prcptid, prcpt.getName().equals("lastActionResult"), prcpt.getParameters().toString().equals("[failed_status]"))
+then
+    String direction = agent.generateRandomDirection();
+    eis.performAction("A1", new Action("move", new Identifier(direction)));
+    logger.info("$$$$$ RULE EXECUTION : " + "failed_status : move randomly : " + direction);
+end
