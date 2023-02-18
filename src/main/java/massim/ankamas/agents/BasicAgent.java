@@ -42,8 +42,8 @@ public class BasicAgent extends Agent {
         super(name, mailbox);
 
         db = StorageFactory.getInstance().createStorage();
-        db.open(".\\db\\" + name + ".dbs", Storage.DEFAULT_PAGE_POOL_SIZE);
-
+        db.open("./db/" + name + ".dbs", Storage.DEFAULT_PAGE_POOL_SIZE);
+        //db.open("x.dbs", Storage.DEFAULT_PAGE_POOL_SIZE);
         root = (Index) db.getRoot(); // get storage root
         if (root == null) {
             // Root is not yet defined: storage is not initialized
@@ -70,6 +70,7 @@ public class BasicAgent extends Agent {
         int currentPerceptID = 0;
         // iterator through all instance of the class
         Iterator i = classExtent.iterator();
+        logger.info("##### Recovery Start From Perst Database #####");
         while (i.hasNext()) {
             TPercept tpercept = (TPercept) i.next();
             currentPerceptID = tpercept.prcptid;
@@ -80,6 +81,7 @@ public class BasicAgent extends Agent {
             KSession.insert(tpercept);
             logger.info(tpercept);
         }
+        logger.info("##### Recovery End From Perst Database #####");
     }
 
     @Override
@@ -103,7 +105,7 @@ public class BasicAgent extends Agent {
             tprcpt.prcptid = stepCount;
 
             //if(tprcpt.prcpt.getName().equals("lastAction"))
-                //System.out.println(tprcpt.prcpt.getParameters().toString());
+                //System.out.println(tprcpt.prcpt.getParameters().get(0).toString());
             /*System.out.println("aaaaaaaa" + percept.getName() + " " + percept.getParameters().toString());
             System.out.println("bbbbbbbb" + percept.getName() + " " + percept.getParameters().isEmpty());
             System.out.println("cccccccc" + percept.getName() + " " + percept.getParameters().size());

@@ -15,7 +15,9 @@ global BasicAgent agent;
 
 rule "If simulation starts for the first time"
 when
-    $tprcpt : TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[]"))
+    TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().toString().equals("[]"))
+    or TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("request"))
+    or TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("adopt"))
 then
     String direction = agent.generateRandomDirection();
     eis.performAction("A1", new Action("move", new Identifier(direction)));
@@ -61,9 +63,9 @@ then
         eis.performAction("A1", new Action("move", new Identifier("s")));
     else if ($direction.equals("[[1,0]]"))
         eis.performAction("A1", new Action("move", new Identifier("e")));
-     else
+    else
         eis.performAction("A1", new Action("move", new Identifier("w")));
-    logger.info("$$$$$ RULE EXECUTION : " + "If there is an obstacle in front of the agent : clear " + $direction);
+    logger.info("$$$$$ RULE EXECUTION : " + "If the obstacle in front of the agentA1 is successfully cleared : move to the same direction " + $direction);
 end
 
 rule "If massim produces failed_random randomly"
@@ -83,4 +85,62 @@ then
     String direction = agent.generateRandomDirection();
     eis.performAction("A1", new Action("move", new Identifier(direction)));
     logger.info("$$$$$ RULE EXECUTION : " + "failed_status : move randomly : " + direction);
+end
+
+rule "If the agent is in role zone"
+when
+    TPercept(prcpt.getName().equals("roleZone"), prcpt.getParameters().get(0).toString().equals("0")
+                                                        && prcpt.getParameters().get(1).toString().equals("0"))
+    not TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("adopt"))
+then
+    eis.performAction("A1", new Action("adopt", new Identifier("constructor")));
+    logger.info("$$$$$ RULE EXECUTION : If the agent is in role zone: Adopt role");
+end
+
+rule "If there is a dispenser at east"
+when
+    TPercept(prcpt.getName().equals("thing"), prcpt.getParameters().get(2).toString().equals("dispenser")
+                                                        && prcpt.getParameters().get(0).toString().equals("1")
+                                                        && prcpt.getParameters().get(1).toString().equals("0"))
+    not TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("request"))
+    not TPercept(prcpt.getName().equals("lastActionResult"), prcpt.getParameters().get(0).toString().equals("failed_role"))
+then
+    eis.performAction("A1", new Action("request", new Identifier("e")));
+    logger.info("$$$$$ RULE EXECUTION : If there is a dispenser at east of the agent : Block requested from east");
+end
+
+rule "If there is a dispenser at west"
+when
+    TPercept(prcpt.getName().equals("thing"), prcpt.getParameters().get(2).toString().equals("dispenser")
+                                                        && prcpt.getParameters().get(0).toString().equals("-1")
+                                                        && prcpt.getParameters().get(1).toString().equals("0"))
+    not TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("request"))
+    not TPercept(prcpt.getName().equals("lastActionResult"), prcpt.getParameters().get(0).toString().equals("failed_role"))
+then
+    eis.performAction("A1", new Action("request", new Identifier("w")));
+    logger.info("$$$$$ RULE EXECUTION : If there is a dispenser at west of the agent : Block requested from west");
+end
+
+rule "If there is a dispenser at south"
+when
+    TPercept(prcpt.getName().equals("thing"), prcpt.getParameters().get(2).toString().equals("dispenser")
+                                                        && prcpt.getParameters().get(0).toString().equals("0")
+                                                        && prcpt.getParameters().get(1).toString().equals("1"))
+    not TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("request"))
+    not TPercept(prcpt.getName().equals("lastActionResult"), prcpt.getParameters().get(0).toString().equals("failed_role"))
+then
+    eis.performAction("A1", new Action("request", new Identifier("s")));
+    logger.info("$$$$$ RULE EXECUTION : If there is a dispenser at south of the agent : Block requested from south");
+end
+
+rule "If there is a dispenser at north"
+when
+    TPercept(prcpt.getName().equals("thing"), prcpt.getParameters().get(2).toString().equals("dispenser")
+                                                        && prcpt.getParameters().get(0).toString().equals("0")
+                                                        && prcpt.getParameters().get(1).toString().equals("-1"))
+    not TPercept(prcpt.getName().equals("lastAction"), prcpt.getParameters().get(0).toString().equals("request"))
+    not TPercept(prcpt.getName().equals("lastActionResult"), prcpt.getParameters().get(0).toString().equals("failed_role"))
+then
+    eis.performAction("A1", new Action("request", new Identifier("n")));
+    logger.info("$$$$$ RULE EXECUTION : If there is a dispenser at north of the agent : Block requested from north");
 end
